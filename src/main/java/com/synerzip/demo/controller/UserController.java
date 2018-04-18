@@ -1,8 +1,11 @@
 package com.synerzip.demo.controller;
 
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 import com.synerzip.demo.model.User;
 import com.synerzip.demo.service.UserDaoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -34,8 +37,12 @@ public class UserController {
     }
 
     @RequestMapping("/{id}")
-    public User getUser(@PathVariable int id) {
-        return userDaoService.findOne(id);
+    public Resource<User> getUser(@PathVariable int id) {
+        User user = userDaoService.findOne(id);
+        Resource<User> resource = new Resource<User>(user);
+        ControllerLinkBuilder linkBuilder = linkTo(methodOn(this.getClass()).getAllUser());
+        resource.add(linkBuilder.withRel("all-users"));
+        return resource;
     }
 
     @DeleteMapping("/{id}")
