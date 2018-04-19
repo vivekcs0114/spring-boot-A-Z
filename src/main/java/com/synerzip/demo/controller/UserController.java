@@ -4,6 +4,9 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 import com.synerzip.demo.model.User;
 import com.synerzip.demo.service.UserDaoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContext;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +16,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
+import java.util.Locale;
 
 @RestController
 @RequestMapping("/users")
@@ -20,6 +24,9 @@ public class UserController {
 
     @Autowired
     UserDaoService userDaoService;
+
+    @Autowired
+    private MessageSource messageSource;
 
     @RequestMapping()
     public List<User> getAllUser() {
@@ -48,5 +55,17 @@ public class UserController {
     @DeleteMapping("/{id}")
     public User deleteUser(@PathVariable int id) {
         return userDaoService.deleteById(id);
+    }
+
+    //1Locale. getting locale from header
+    /*@GetMapping("/hello-world-internationalized")
+    public String helloWorldInternationalized(@RequestHeader(name = "Accept-Language", required = false) Locale locale) {
+        return messageSource.getMessage("good.morning.message", null, locale);
+    }*/
+
+    //2Locale. getting locale from locale context
+    @GetMapping("/hello-world-internationalized")
+    public String helloWorldInternationalized() {
+        return messageSource.getMessage("good.morning.message", null, LocaleContextHolder.getLocale());
     }
 }
