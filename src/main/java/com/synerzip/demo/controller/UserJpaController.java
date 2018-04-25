@@ -1,7 +1,9 @@
 package com.synerzip.demo.controller;
 
 import com.synerzip.demo.exception.UserNotFoundException;
+import com.synerzip.demo.model.Post;
 import com.synerzip.demo.model.User;
+import com.synerzip.demo.repository.PostJpaRepository;
 import com.synerzip.demo.repository.UserJpaRepository;
 import com.synerzip.demo.service.UserDaoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,9 @@ public class UserJpaController {
 
     @Autowired
     UserJpaRepository userJpaRepository;
+
+    @Autowired
+    PostJpaRepository postJpaRepository;
 
     @RequestMapping()
     public List<User> getAllUser() {
@@ -57,5 +62,28 @@ public class UserJpaController {
     @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable int id) {
         userJpaRepository.deleteById(id);
+    }
+
+    @GetMapping("/{id}/posts")
+    public List<Post> getUserPosts(@PathVariable int id) {
+        Optional<User> user = userJpaRepository.findById(id);
+        if(!user.isPresent())
+            throw new UserNotFoundException("id - > "+id);
+        return user.get().getPosts();
+    }
+
+    @PostMapping("/{id}/posts")
+    public ResponseEntity<Object> addUserPost(@PathVariable int id, @RequestBody Post post) {
+        Optional<User> dbUser = userJpaRepository.findById(id);
+        if(!dbUser.isPresent())
+            throw new UserNotFoundException("id - > "+id);
+        User user = dbUser.get();
+        post.setUser(user);
+        postJpaRepository.save(post);
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(post.getId()).toUri();
+        return ResponseEntity.created(location).build();
     }
 }
