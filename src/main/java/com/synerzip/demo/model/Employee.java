@@ -1,16 +1,15 @@
 package com.synerzip.demo.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonFilter;
 
-//@JsonIgnoreProperties(value = {"email", "password"})
+@JsonFilter("EmployeeBeanFilter")
 public class Employee {
     private String name;
     private String email;
-    @JsonIgnore
     private String password;
 
     public Employee(String name, String email, String password) {
+        super();
         this.name = name;
         this.email = email;
         this.password = password;
