@@ -6,6 +6,8 @@ import com.synerzip.demo.model.User;
 import com.synerzip.demo.repository.PostJpaRepository;
 import com.synerzip.demo.repository.UserJpaRepository;
 import com.synerzip.demo.service.UserDaoService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -27,6 +29,9 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @RequestMapping("/jpa/users")
 public class UserJpaController {
 
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(UserJpaController.class);
+
     @Autowired
     UserJpaRepository userJpaRepository;
 
@@ -45,6 +50,7 @@ public class UserJpaController {
                 .fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(savedUser.getId()).toUri();
+        LOGGER.info("New User is created : " + savedUser);
         return ResponseEntity.created(location).build();
     }
 
@@ -67,8 +73,10 @@ public class UserJpaController {
     @GetMapping("/{id}/posts")
     public List<Post> getUserPosts(@PathVariable int id) {
         Optional<User> user = userJpaRepository.findById(id);
-        if(!user.isPresent())
+        if(!user.isPresent()) {
+            LOGGER.info("User not found : " + id);
             throw new UserNotFoundException("id - > "+id);
+        }
         return user.get().getPosts();
     }
 
